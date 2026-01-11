@@ -51,3 +51,31 @@ def sampling_distribution(population_data, samp_size, stat):
   plt.legend()
   plt.show()
   plt.clf()
+
+def one_sample_permutation_test(data, mu_0, n_permutations=10000, alternative='two-sided'):
+    """
+    Simple one-sample permutation test by sign-flipping
+    (equivalent to testing whether mean deviation from mu_0 is zero)
+    """
+    observed_diff = np.mean(data - mu_0)
+    
+    # Center data around mu_0
+    centered = data - mu_0
+    
+    # Generate permutation distribution
+    perm_diffs = np.zeros(n_permutations)
+    
+    for i in range(n_permutations):
+        # Randomly flip signs (+1 or -1)
+        signs = np.random.choice([-1, 1], size=len(centered), replace=True)
+        perm_diffs[i] = np.mean(centered * signs)
+    
+    # Two-tailed p-value
+    if alternative == 'two-sided':
+        p_value = np.mean(np.abs(perm_diffs) >= np.abs(observed_diff))
+    elif alternative == 'greater':
+        p_value = np.mean(perm_diffs >= observed_diff)
+    else:  # less
+        p_value = np.mean(perm_diffs <= observed_diff)
+    
+    return observed_diff, p_value, perm_diffs
